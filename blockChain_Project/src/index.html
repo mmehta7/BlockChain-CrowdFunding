@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Crowd Funding</title>
+
+
+<style type="text/css">
+  
+#_paymentInfo, #_projectIssues{
+  color: blue;
+  text-align: center;
+} 
+
+</style>
+</head>
+<body>
+
+<div class="New_Project">
+
+  <h1> Register a New Project</h1>
+  <p>
+    <label > Funding Goal: </label>
+    <input id="_fGoal" type="text" required="it is required">
+  </p>
+  <p>
+    <label > Title of the Project: </label>
+    <input id="_pTitle" type="text" required="it is required">
+  </p>  
+  <p id ='_projectIssues'></p>
+  <button id="_project">Register</button>
+
+</div>
+
+<div class="View_Projects">
+
+  <h1>Names and Index Number of all the Projects</h1>
+   <p id ='_projectNames'></p>
+
+</div>
+
+<div class="Project_Info">
+  
+  <h1>Details Regarding the Project</h1>
+  <p>
+    <label > Index NO.: </label>
+    <input id="_DIndex" type="text" placeholder="index of the project" required="it is required">
+  </p>
+  <p id ='_projectInfo'></p>
+  <button id="_PInfo">Project Info</button>
+
+</div>
+
+<div class="Project_Funds">
+  
+  <h1>Please Donate Fund!!</h1>
+  <p>
+    <label > Index Number: </label>
+    <input id="_fIndex" type="text" placeholder="index of the project" required="it is required">
+  </p>
+  <p>
+    <label > Donation Ammout: </label>
+    <input id="_falue" type="text" placeholder="Amount you want to donate in wie" required="it is required">
+  </p>
+  <p id ='_paymentInfo'></p>
+  <button id="_PFund">Send Fund</button>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.36/dist/web3.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>  
+
+  <script>
+
+
+  	var contract1;
+
+  	$(document).ready(function()
+  	{
+  		if (typeof web3 !== 'undefined') {
+            web3 = new Web3(web3.currentProvider);
+             window.ethereum.enable();
+        } else {
+            web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+        }
+
+        var address="0xcacb66db1fa8c85672a44593bb79f939bb0591dd"; 
+        var abi= [
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_fundingGoal",
+        "type": "uint256"
+      },
+      {
+        "name": "_title",
+        "type": "string"
+      }
+    ],
+    "name": "Project",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "contributors",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "Projects",
+    "outputs": [
+      {
+        "name": "goal",
+        "type": "uint256"
+      },
+      {
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "name": "creator",
+        "type": "address"
+      },
+      {
+        "name": "totalFunding",
+        "type": "uint256"
+      },
+      {
+        "name": "contributionsCount",
+        "type": "uint256"
+      },
+      {
+        "name": "contributorsCount",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "index",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "viewProjects",
+    "outputs": [
+      {
+        "name": "",
+        "type": "string[]"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_index",
+        "type": "uint256"
+      }
+    ],
+    "name": "fund",
+    "outputs": [
+      {
+        "name": "_result",
+        "type": "string"
+      }
+    ],
+    "payable": true,
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_index",
+        "type": "uint256"
+      }
+    ],
+    "name": "getProject",
+    "outputs": [
+      {
+        "name": "",
+        "type": "string"
+      },
+      {
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "name": "",
+        "type": "address"
+      },
+      {
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+
+contract1= new web3.eth.Contract(abi, address);
+
+
+
+web3.eth.getAccounts().then(async (accounts) => {
+  var reqs= await contract1.methods.viewProjects().call({from: accounts[0]});
+  console.log(reqs);
+  var all_reqs=[];
+  var i=0;
+  for (const req in reqs)
+  {
+    all_reqs.push({
+      key: i ,
+      address: reqs[req],
+    });
+    i++;
+  }
+
+  var node= document.getElementById('_projectNames');
+  console.log(all_reqs.length);
+  //var j=0;
+  function strip(string) 
+  { 
+    return string.replace("[object HTMLParagraphElement]", ''); 
+  }
+
+  for(const i in all_reqs)
+  {
+      node += "Index Number:     "+i+"         "+"Project Name:      "+ all_reqs[i].address+ "<br>" ;
+  }
+  node= strip(node);
+   $('#_projectNames').html(node);
+})
+
+
+
+
+
+$('#_PInfo').click(function()
+{
+  var _pind = parseInt($('#_DIndex').val());
+  web3.eth.getAccounts().then(async(accounts) => {
+        var acc= accounts[0];
+        var response = await contract1.methods.getProject(_pind).call({ from: accounts[0]});
+        var _return = "Project Title:  " +response[0]+"<br>" + "Project Funding Goal:  " +response[1] +"<br>" + "Project Creator Hash:  " +response[2]+ "<br>" + "Total Funding Recived Till Now:  " + response[3] +"<br>" + "Total Contibution Count:  "+ response[4]+ "<br>" + "Total Contributors Count:  "+response[5] ; 
+        $('#_projectInfo').html(_return);
+        
+  })
+})
+
+})
+    
+  	$('#_project').click(function()
+  	{
+  		var _goal = 0;
+  		_goal = parseInt($('#_fGoal').val());
+      var _title = $('#_pTitle').val();
+
+  		web3.eth.getAccounts().then(function(accounts)
+  		{
+  			var acc= accounts[0];
+  			return contract1.methods.Project( _goal, _title).send({ from: accounts[0]}).then((result) => { $('#_projectIssues').html("You have Successfully Registered a Project" );}, (error) => {
+          $('#_projectIssues').html("Project funding goal must be greater than 0." );
+        });
+  		}).then(function(tx)
+  		{
+  			console.log(tx);
+  		}).catch(function(tx)
+  		{
+  			console.log(tx);
+  		})
+
+  	})
+
+
+$('#_PFund').click(function()
+    {
+
+      var amt=0;
+      amt= parseInt($('#_falue').val());
+      var _find = $('#_fIndex').val();
+     
+      web3.eth.getAccounts().then(function(accounts)
+      {
+        var acc= accounts[0];
+        return contract1.methods.fund(_find).send({'value': amt, from: accounts[0]}).then((result) => {$('#_paymentInfo').html(" Thanks for your contribution, your contriution is successfully recived." );}, (error) => {
+          console.log(error.reason);
+          $('#_paymentInfo').html("Payment Failed!!, the goal has already been fullfilled, Or you are trying to send 0 wie (the value of wie should be greater than 0 )." );
+        });
+      }).then(function(tx)
+      {
+        console.log(tx);
+      }).catch(function(tx)
+      {
+        console.log(tx);
+      })
+
+
+
+
+    })
+
+
+
+</script>
+
+</body>
+</html>
